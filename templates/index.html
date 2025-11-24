@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>File Upload + Q&A</title>
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    .section { margin-bottom: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 10px; }
+    th, td { border: 1px solid #ddd; padding: 8px; }
+    th { background: #f0f0f0; }
+    #answer { white-space: pre-wrap; background: #fafafa; padding: 10px; border: 1px solid #ddd; }
+  </style>
+</head>
+<body>
+  <h1>Upload, Ask & Display</h1>
+
+  <!-- 1. Pick & upload a text file -->
+  <div class="section">
+    <h2>Upload Text File</h2>
+    <input id="fileInput" type="file" accept="text/plain" />
+    <button onclick="uploadFile()">Upload</button>
+  </div>
+
+  <!-- 2. Ask Question -->
+  <div class="section">
+    <h2>Ask a Question</h2>
+    <input id="question" type="text" style="width: 300px;" placeholder="Type your question here..." />
+    <button onclick="askQuestion()">Submit</button>
+  </div>
+
+  <!-- 3. Answer -->
+  <div class="section">
+    <h2>Answer</h2>
+    <div id="answer">(No answer yet)</div>
+  </div>
+
+  <!-- 4. Chunks table -->
+  <div class="section">
+    <h2>Chunks</h2>
+    <table>
+      <thead>
+        <tr><th>#</th><th>Chunk</th></tr>
+      </thead>
+      <tbody id="chunksTable"></tbody>
+    </table>
+  </div>
+
+  <script>
+    async function uploadFile() {
+      const file = document.getElementById('fileInput').files[0];
+      if (!file) return alert('No file selected');
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/upload', { method: 'POST', body: formData });
+      if (!res.ok) return alert('Upload failed');
+      alert('File uploaded and indexed');
+    }
+
+    async function askQuestion() {
+      const q = document.getElementById('question').value;
+      if (!q) return alert('No question entered');
+
+      const res = await fetch('/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: q })
+      });
+
+      if (!res.ok) return alert('Error asking question');
+      const data = await res.json();
+
+      // Show answer
+      document.getElementById('answer').textContent = data.answer || '(no answer)';
+
+      // Populate chunks table
+      const tbody = document.getElementById('chunksTable');
+      tbody.innerHTML = '';
+      (data.chunks || []).forEach((chunk, idx) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td>${idx+1}</td><td>${chunk}</td>`;
+        tbody.appendChild(row);
+      });
+    }
+  </script>
+</body>
+</html>

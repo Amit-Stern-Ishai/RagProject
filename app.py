@@ -24,7 +24,7 @@ _lock = threading.Lock()
 # ---------------------------
 @app.get("/")
 def home():
-    return jsonify({"status": "ok"})
+    return render_template("index.html")
 
 # ---------------------------
 # APIs
