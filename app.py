@@ -2,6 +2,7 @@ import os
 import threading
 import numpy as np
 from flask import Flask, request, jsonify, render_template
+import json
 
 from flask import Flask, request, jsonify
 import boto3
@@ -9,9 +10,15 @@ from botocore.exceptions import ClientError
 
 # app = Flask(__name__)
 
+REGION   = "us-east-1"
+
 # Your S3 settings
 S3_BUCKET = "amit-ishai-rag-bucket-2"
 s3 = boto3.client("s3")
+client = boto3.client("bedrock-agent-runtime")
+bedrock = boto3.client("bedrock-runtime", region_name=REGION)
+
+MODEL_ID = "anthropic.claude-3-5-sonnet-20240620-v1:0"  # <-- put your exact Sonnet model ID here
 
 # ---------------------------
 # Config
@@ -76,7 +83,53 @@ def reindex():
 
 @app.post("/ask")
 def ask():
-    return jsonify({"question": "question"})
+    data = request.get_json()  # read JSON body
+    question = data.get("question")  # extract the prompt text
+
+    if not question:
+        return {"error": "Missing question"}, 400
+
+    answer = claude_complete(prompt=question)
+
+    return jsonify({"answer": answer})
+
+def claude_complete(prompt: str) -> str:
+    context = ""
+
+    response = client.retrieve(
+        knowledgeBaseId="OANROOCWZJ",
+        retrievalQuery={"text": prompt}
+    )
+
+    for item in response["retrievalResults"]:
+        context += f"{item['content']['text']}\n"
+
+    final_prompt = f'''
+                        Prompt: {prompt}
+                        Context: {context}
+                        '''
+    body = {
+        "anthropic_version": "bedrock-2023-05-31",
+        "max_tokens": 1000,
+        "temperature": 0.2,
+        # optional "system": "You are a concise assistant.",
+        "messages": [
+            {"role": "user", "content": [{"type": "text", "text": final_prompt}]}
+        ]
+    }
+
+    try:
+        resp = bedrock.invoke_model(modelId=MODEL_ID, body=json.dumps(body))
+        payload = resp["body"].read() if hasattr(resp.get("body"), "read") else resp["body"]
+        data = json.loads(payload)
+
+        # Anthropic messages return a list of content blocks; join any text blocks.
+        parts = data.get("content", [])
+        text = "".join(p.get("text", "") for p in parts if isinstance(p, dict))
+        return text.strip()
+
+    except ClientError as e:
+        raise RuntimeError(f"Bedrock InvokeModel failed: {e.response.get('Error', {}).get('Message')}") from e
 
 # ---------------------------
 # Start
