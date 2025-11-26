@@ -89,11 +89,11 @@ def ask():
     if not question:
         return {"error": "Missing question"}, 400
 
-    answer = claude_complete(prompt=question)
+    answer, chunks = claude_complete(prompt=question)
 
-    return jsonify({"answer": answer})
+    return jsonify({"answer": answer, "chunks": chunks})
 
-def claude_complete(prompt: str) -> str:
+def claude_complete(prompt: str):
     context = ""
 
     response = client.retrieve(
@@ -101,8 +101,12 @@ def claude_complete(prompt: str) -> str:
         retrievalQuery={"text": prompt}
     )
 
+    chunks = []
+
     for item in response["retrievalResults"]:
-        context += f"{item['content']['text']}\n"
+        result = item['content']['text']
+        context += f"{result}\n"
+        chunks.append(result)
 
     final_prompt = f'''
                         Prompt: {prompt}
@@ -126,7 +130,7 @@ def claude_complete(prompt: str) -> str:
         # Anthropic messages return a list of content blocks; join any text blocks.
         parts = data.get("content", [])
         text = "".join(p.get("text", "") for p in parts if isinstance(p, dict))
-        return text.strip()
+        return text.strip(), chunks
 
     except ClientError as e:
         raise RuntimeError(f"Bedrock InvokeModel failed: {e.response.get('Error', {}).get('Message')}") from e

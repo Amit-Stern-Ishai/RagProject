@@ -3,45 +3,123 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>File Upload + Q&A</title>
+  <title>AI File Upload + Q&A</title>
   <style>
-    body { font-family: sans-serif; margin: 20px; }
-    .section { margin-bottom: 20px; }
-    table { border-collapse: collapse; width: 100%; margin-top: 10px; }
-    th, td { border: 1px solid #ddd; padding: 8px; }
-    th { background: #f0f0f0; }
-    #answer { white-space: pre-wrap; background: #fafafa; padding: 10px; border: 1px solid #ddd; }
+    body {
+      font-family: "Inter", sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
+      margin: 0;
+      padding: 40px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 2.2rem;
+      color: #58a6ff;
+    }
+
+    .card {
+      background: #161b22;
+      padding: 25px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.3);
+      border: 1px solid #30363d;
+    }
+
+    .card h2 {
+      margin-top: 0;
+      color: #79c0ff;
+      font-size: 1.4rem;
+      margin-bottom: 15px;
+    }
+
+    input[type="file"], input[type="text"] {
+      background: #0d1117;
+      border: 1px solid #30363d;
+      padding: 10px;
+      border-radius: 8px;
+      color: #e6edf3;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    button {
+      background: #238636;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    button:hover {
+      background: #2ea043;
+    }
+
+    #answer {
+      background: #0d1117;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #30363d;
+      min-height: 50px;
+      white-space: pre-wrap;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th {
+      background: #21262d;
+      color: #79c0ff;
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #30363d;
+    }
+
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #30363d;
+    }
+
+    tr:hover td {
+      background: #161b22;
+    }
   </style>
 </head>
 <body>
-  <h1>Upload, Ask & Display</h1>
+  <h1>AI Knowledge Base Console</h1>
 
-  <!-- 1. Pick & upload a text file -->
-  <div class="section">
-    <h2>Upload Text File</h2>
+  <div class="card">
+    <h2>Upload a Text File</h2>
     <input id="fileInput" type="file" accept="text/plain" />
-    <button onclick="uploadFile()">Upload</button>
+    <button onclick="uploadFile()">Upload File</button>
   </div>
 
-  <!-- 2. Ask Question -->
-  <div class="section">
+  <div class="card">
     <h2>Ask a Question</h2>
-    <input id="question" type="text" style="width: 300px;" placeholder="Type your question here..." />
-    <button onclick="askQuestion()">Submit</button>
+    <input id="question" type="text" placeholder="Type your question here..." />
+    <button onclick="askQuestion()">Submit Question</button>
   </div>
 
-  <!-- 3. Answer -->
-  <div class="section">
+  <div class="card">
     <h2>Answer</h2>
     <div id="answer">(No answer yet)</div>
   </div>
 
-  <!-- 4. Chunks table -->
-  <div class="section">
-    <h2>Chunks</h2>
+  <div class="card">
+    <h2>Retrieved Chunks</h2>
     <table>
       <thead>
-        <tr><th>#</th><th>Chunk</th></tr>
+        <tr><th>#</th><th>Text Chunk</th></tr>
       </thead>
       <tbody id="chunksTable"></tbody>
     </table>
@@ -73,10 +151,8 @@
       if (!res.ok) return alert('Error asking question');
       const data = await res.json();
 
-      // Show answer
       document.getElementById('answer').textContent = data.answer || '(no answer)';
 
-      // Populate chunks table
       const tbody = document.getElementById('chunksTable');
       tbody.innerHTML = '';
       (data.chunks || []).forEach((chunk, idx) => {
