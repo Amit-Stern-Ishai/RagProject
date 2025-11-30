@@ -10,33 +10,22 @@ from botocore.exceptions import ClientError
 
 from TextProcessing import convert_uploaded_json_to_fileobj
 
-# app = Flask(__name__)
-
-REGION   = "us-east-1"
-
-# Your S3 settings
-S3_BUCKET = "amit-ishai-rag-bucket-2"
-s3 = boto3.client("s3")
-client = boto3.client("bedrock-agent-runtime")
-bedrock = boto3.client("bedrock-runtime", region_name=REGION)
-
-MODEL_ID = "anthropic.claude-3-5-sonnet-20240620-v1:0"  # <-- put your exact Sonnet model ID here
-
 # ---------------------------
 # Config
 # ---------------------------
-DATA_DIR = os.environ.get("RAG_DATA_DIR", "data")
-EMBED_MODEL_NAME = os.environ.get("EMBED_MODEL", "all-MiniLM-L6-v2")
-GEMINI_MODEL = os.environ.get("GEMINI_MODEL", "models/gemini-2.5-flash")
-GEMINI_API_KEY = os.environ.get("GOOGLE_API_KEY", "AIzaSyDqI2y9hM97eWENW0KxY5zVO3MNYKMotcw") or os.environ.get("GEMINI_API_KEY")
+REGION   = "us-east-1"
+S3_BUCKET = "amit-ishai-rag-bucket-2"
+MODEL_ID = "anthropic.claude-3-5-sonnet-20240620-v1:0"  # <-- put your exact Sonnet model ID here
+KNOWLEDGE_BASE_ID = "OANROOCWZJ"
+
+s3 = boto3.client("s3")
+client = boto3.client("bedrock-agent-runtime")
+bedrock = boto3.client("bedrock-runtime", region_name=REGION)
 
 # ---------------------------
 # Flask + globals
 # ---------------------------
 app = Flask(__name__)
-os.makedirs(DATA_DIR, exist_ok=True)
-
-_lock = threading.Lock()
 
 # ---------------------------
 # Pages
@@ -50,8 +39,7 @@ def home():
 # ---------------------------
 @app.get("/health")
 def health():
-    with _lock:
-        return jsonify({"status": "ok"})
+    return jsonify({"status": "ok"})
 
 @app.post("/upload")
 def upload():
@@ -62,17 +50,17 @@ def upload():
     if file.filename == "":
         return jsonify({"error": "No selected file"}), 400
 
-    to_upload = convert_uploaded_json_to_fileobj(file)
+    files_to_upload = convert_uploaded_json_to_fileobj(file)
 
-    for chunk_file in to_upload:
-        key = f"{chunk_file.name}"
+    for file_to_upload in files_to_upload:
+        key = file_to_upload.name
 
         try:
             s3.upload_fileobj(
-                Fileobj=chunk_file,
+                Fileobj=file_to_upload,
                 Bucket=S3_BUCKET,
                 Key=key,
-                ExtraArgs={"ContentType": chunk_file.content_type}
+                ExtraArgs={"ContentType": file_to_upload.content_type}
             )
         except ClientError as e:
             return jsonify({"error": str(e)}), 500
@@ -101,7 +89,7 @@ def claude_complete(prompt: str):
     context = ""
 
     response = client.retrieve(
-        knowledgeBaseId="OANROOCWZJ",
+        knowledgeBaseId=KNOWLEDGE_BASE_ID,
         retrievalQuery={"text": prompt}
     )
 
