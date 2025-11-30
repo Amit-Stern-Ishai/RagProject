@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI File Upload + Q&A</title>
+  <title>Recipe Helper</title>
+
   <style>
     body {
       font-family: "Inter", sans-serif;
-      background: #0d1117;
-      color: #e6edf3;
+      background: #f6efe7; /* warm kitchen beige */
+      color: #3d2e18;
       margin: 0;
       padding: 40px;
     }
@@ -16,38 +17,41 @@
     h1 {
       text-align: center;
       margin-bottom: 40px;
-      font-size: 2.2rem;
-      color: #58a6ff;
+      font-size: 2.4rem;
+      color: #d35400; /* warm orange */
+      text-shadow: 1px 1px #ffffff;
     }
 
     .card {
-      background: #161b22;
+      background: #fff8f1;
       padding: 25px;
-      border-radius: 12px;
+      border-radius: 16px;
       margin-bottom: 30px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.3);
-      border: 1px solid #30363d;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      border: 2px solid #f0e0d0;
     }
 
     .card h2 {
       margin-top: 0;
-      color: #79c0ff;
-      font-size: 1.4rem;
+      color: #a04000;
+      font-size: 1.5rem;
       margin-bottom: 15px;
     }
 
-    input[type="file"], input[type="text"] {
-      background: #0d1117;
-      border: 1px solid #30363d;
+    input[type="file"],
+    input[type="text"] {
+      background: #fff;
+      border: 2px solid #e6d7c8;
       padding: 10px;
       border-radius: 8px;
-      color: #e6edf3;
+      color: #3d2e18;
       width: 100%;
       margin-bottom: 10px;
+      font-size: 1rem;
     }
 
     button {
-      background: #238636;
+      background: #e67e22; /* carrot orange */
       color: white;
       border: none;
       padding: 10px 18px;
@@ -57,14 +61,14 @@
     }
 
     button:hover {
-      background: #2ea043;
+      background: #d35400; /* roasted orange */
     }
 
     #answer {
-      background: #0d1117;
+      background: #fff;
       padding: 15px;
       border-radius: 8px;
-      border: 1px solid #30363d;
+      border: 2px solid #e6d7c8;
       min-height: 50px;
       white-space: pre-wrap;
     }
@@ -75,38 +79,40 @@
       margin-top: 15px;
       border-radius: 8px;
       overflow: hidden;
+      background: #fff;
     }
 
     th {
-      background: #21262d;
-      color: #79c0ff;
+      background: #ffe6cc; /* light orange */
+      color: #8e4100;
       padding: 10px;
       text-align: left;
-      border-bottom: 1px solid #30363d;
+      border-bottom: 2px solid #f0e0d0;
     }
 
     td {
       padding: 10px;
-      border-bottom: 1px solid #30363d;
+      border-bottom: 1px solid #f3e4d6;
     }
 
     tr:hover td {
-      background: #161b22;
+      background: #fff3e6;
     }
   </style>
 </head>
+
 <body>
-  <h1>AI Knowledge Base Console</h1>
+  <h1>🍽️ Recipe Helper</h1>
 
   <div class="card">
-    <h2>Upload a Text File</h2>
-    <input id="fileInput" type="file" accept="text/plain" />
+    <h2>Upload a Recipe JSON File</h2>
+    <input id="fileInput" type="file" accept="application/json" />
     <button onclick="uploadFile()">Upload File</button>
   </div>
 
   <div class="card">
-    <h2>Ask a Question</h2>
-    <input id="question" type="text" placeholder="Type your question here..." />
+    <h2>Ask a Cooking Question</h2>
+    <input id="question" type="text" placeholder="e.g. How do I make gluten-free donuts fluffier?" />
     <button onclick="askQuestion()">Submit Question</button>
   </div>
 
@@ -116,7 +122,7 @@
   </div>
 
   <div class="card">
-    <h2>Retrieved Chunks</h2>
+    <h2>Retrieved Recipe Chunks</h2>
     <table>
       <thead>
         <tr><th>#</th><th>Text Chunk</th></tr>

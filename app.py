@@ -8,6 +8,8 @@ from flask import Flask, request, jsonify
 import boto3
 from botocore.exceptions import ClientError
 
+from TextProcessing import convert_uploaded_json_to_fileobj
+
 # app = Flask(__name__)
 
 REGION   = "us-east-1"
@@ -60,21 +62,23 @@ def upload():
     if file.filename == "":
         return jsonify({"error": "No selected file"}), 400
 
-    key = f"{file.filename}"
+    to_upload = convert_uploaded_json_to_fileobj(file)
 
-    try:
-        s3.upload_fileobj(
-            Fileobj=file,
-            Bucket=S3_BUCKET,
-            Key=key,
-            ExtraArgs={"ContentType": file.content_type}
-        )
-    except ClientError as e:
-        return jsonify({"error": str(e)}), 500
+    for chunk_file in to_upload:
+        key = f"{chunk_file.name}"
+
+        try:
+            s3.upload_fileobj(
+                Fileobj=chunk_file,
+                Bucket=S3_BUCKET,
+                Key=key,
+                ExtraArgs={"ContentType": chunk_file.content_type}
+            )
+        except ClientError as e:
+            return jsonify({"error": str(e)}), 500
 
     return jsonify({
-        "message": "File uploaded successfully",
-        "s3_key": key
+        "message": "File uploaded successfully"
     })
 
 @app.post("/reindex")
