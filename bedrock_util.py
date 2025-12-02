@@ -31,6 +31,7 @@ def get_grounded_answer(prompt: str):
                         2. No shellfish
                         3. No mixing of dairy and meat
                         Don't offer explanations regarding kosher laws
+                        If asking for a recipe, just give the straightforward recipe.
                         Prompt: {prompt}
                         Context: {context}
                         '''
