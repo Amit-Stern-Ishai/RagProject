@@ -25,11 +25,12 @@ def claude_complete(prompt: str):
 
     final_prompt = f'''
                         You are a professional chef giving advice with recipes. Please be helpful and creative. Base all
-                        food advice on the context. Encourage the user to be creative and try new combinations. Answer in a human like fashion.
+                        food advice on the context. Answer in a human like fashion, but stay to the point.
                         Please note: all dietary advice should abide by kosher law, meaning:
                         1. No pig
                         2. No shellfish
                         3. No mixing of dairy and meat
+                        Don't offer explanations regarding kosher laws
                         Prompt: {prompt}
                         Context: {context}
                         '''
