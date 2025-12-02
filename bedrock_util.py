@@ -8,6 +8,7 @@ from environment_variables import REGION, KNOWLEDGE_BASE_ID, MODEL_ID
 client = boto3.client("bedrock-agent-runtime")
 bedrock = boto3.client("bedrock-runtime", region_name=REGION)
 
+# Fetches context, and then forms a prompt to query the llm
 def get_grounded_answer(prompt: str):
     context = ""
 

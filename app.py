@@ -22,6 +22,7 @@ def home():
 def health():
     return jsonify({"status": "ok"})
 
+# Receives json file for recipes and uploads the transformed version in chunks under 50mb
 @app.post("/upload")
 def upload():
     if "file" not in request.files:
@@ -37,6 +38,7 @@ def upload():
         "message": "File uploaded successfully"
     })
 
+# Receives question and answers
 @app.post("/ask")
 def ask():
     data = request.get_json()  # read JSON body
