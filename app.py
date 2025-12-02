@@ -2,7 +2,7 @@ import os
 from flask import Flask, request, jsonify
 from flask import render_template
 
-from bedrock_util import claude_complete
+from bedrock_util import get_grounded_answer
 from s3_util import upload_files
 from text_processing import convert_uploaded_json_to_fileobj
 
@@ -45,7 +45,7 @@ def ask():
     if not question:
         return {"error": "Missing question"}, 400
 
-    answer, chunks = claude_complete(prompt=question)
+    answer, chunks = get_grounded_answer(prompt=question)
 
     return jsonify({"answer": answer, "chunks": chunks})
 

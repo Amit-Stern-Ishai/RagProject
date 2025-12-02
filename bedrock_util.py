@@ -8,7 +8,7 @@ from environment_variables import REGION, KNOWLEDGE_BASE_ID, MODEL_ID
 client = boto3.client("bedrock-agent-runtime")
 bedrock = boto3.client("bedrock-runtime", region_name=REGION)
 
-def claude_complete(prompt: str):
+def get_grounded_answer(prompt: str):
     context = ""
 
     response = client.retrieve(
